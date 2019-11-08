@@ -393,7 +393,7 @@ public class KMedoidsClustering extends AbstractKMeansClustering {
 		int parallism = 4;
 		int maxIterations = 1000;
 		KMedoidsClustering c = new KMedoidsClustering(k, maxIterations, parallism);
-		File dir = FileUtils.getDataRootDir();
+		File dir = FileUtils.getKmeansDataRootDir();
 		c.setInputFiles(new File(dir, "points.txt"));
 		c.clustering();
 		

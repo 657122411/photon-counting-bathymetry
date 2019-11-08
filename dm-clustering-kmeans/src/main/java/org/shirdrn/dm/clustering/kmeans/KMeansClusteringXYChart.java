@@ -166,7 +166,7 @@ public class KMeansClusteringXYChart extends JFrame implements ClusteringXYChart
 	public static void main(String args[]) {
 		int k = 10;
 		int maxIterations = 1000;
-		File dir = FileUtils.getDataRootDir();
+		File dir = FileUtils.getKmeansDataRootDir();
 		
 		final Map<ClusterType, Arg> configs = Maps.newHashMap();
 		configs.put(ClusterType.K_MEANS, new Arg(k, "K-means [k=" + k + "]", 

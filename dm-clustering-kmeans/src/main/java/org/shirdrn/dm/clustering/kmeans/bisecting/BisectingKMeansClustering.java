@@ -217,7 +217,7 @@ public class BisectingKMeansClustering extends Clustering2D {
 		float maxMovingPointRate = 0.01f;
 		int parallism = 5;
 		BisectingKMeansClustering bisecting = new BisectingKMeansClustering(k, m, maxMovingPointRate, parallism);
-		File dir = FileUtils.getDataRootDir();
+		File dir = FileUtils.getKmeansDataRootDir();
 		bisecting.setInputFiles(new File(dir, "points.txt"));
 		bisecting.clustering();
 		

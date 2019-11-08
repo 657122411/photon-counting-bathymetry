@@ -17,9 +17,13 @@ import com.google.common.collect.Sets;
 public class FileUtils {
 
 	
-	public static File getDataRootDir() {
-		return new File(System.getProperty("user.dir") + "\\src\\main\\data");
+	public static File getDbscanDataRootDir() {
+		return new File(System.getProperty("user.dir") + "\\dm-clustering-dbscan\\src\\main\\data");
 	}
+
+    public static File getKmeansDataRootDir() {
+        return new File(System.getProperty("user.dir") + "\\dm-clustering-kmeans\\src\\main\\data");
+    }
 	
 	/**
 	 * Read lines from files, and parse line to create {@link Point2D} types' objects.

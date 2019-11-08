@@ -369,7 +369,7 @@ public class KMeansClustering extends AbstractKMeansClustering {
 		KMeansClustering c = new KMeansClustering(k, maxMovingPointRate, maxInterations, parallism);
 		// set InitialCentroidsSelectionPolicy
 //		c.setInitialCentroidsSelectionPolicy(new KMeansPlusPlusInitialCenterPointsSelectionPolicy());
-		File dir = FileUtils.getDataRootDir();
+		File dir = FileUtils.getKmeansDataRootDir();
 		c.setInputFiles(new File(dir, "points.txt"));
 		c.initialize();
 		c.clustering();

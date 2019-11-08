@@ -264,7 +264,7 @@ public class DBSCANClustering extends Clustering2D {
 //		double eps = 0.013621050253196359;
 		
 		DBSCANClustering c = new DBSCANClustering(minPts, 8);
-		c.setInputFiles(new File(FileUtils.getDataRootDir(), "xy_zfmx.txt"));
+		c.setInputFiles(new File(FileUtils.getDbscanDataRootDir(), "xy_zfmx.txt"));
 		c.getEpsEstimator().setOutputKDsitance(false);
 		c.generateSortedKDistances();
 		
