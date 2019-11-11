@@ -50,9 +50,6 @@ public class DataDenoising {
     private void denoising(double width, double height, double threshold) {
         LOG.info("---start denoising---");
 
-        int indexX = (int) Math.ceil((maxX - minX) / width);
-        int indexY = (int) Math.ceil((maxY - minY) / height);
-
         double startX = allPoints.get(0).getX();
         int flag = 0;
         while(startX <= maxX){
@@ -88,7 +85,7 @@ public class DataDenoising {
                 if(map.get((int) Math.ceil(tempPoint.getY() / height))!=0) {
                     System.out.println(tempPoint.getX()+" "+tempPoint.getY()+" "+1);
                 }else{
-                    System.out.println(tempPoint.getX()+" "+tempPoint.getY()+" "+0);
+                    System.out.println(tempPoint.getX()+" "+tempPoint.getY()+" "+-1);
                 }
             }
 
