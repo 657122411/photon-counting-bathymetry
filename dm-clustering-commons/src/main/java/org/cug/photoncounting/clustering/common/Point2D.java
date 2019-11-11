@@ -1,6 +1,6 @@
 package org.cug.photoncounting.clustering.common;
 
-public class Point2D {
+public class Point2D implements Cloneable {
 
     protected final Double x;
     protected final Double y;
@@ -33,6 +33,17 @@ public class Point2D {
     @Override
     public String toString() {
         return "(" + x + ", " + y + ")";
+    }
+
+    @Override
+    public Object clone() {
+        Point2D o = null;
+        try {
+            o = (Point2D) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return o;
     }
 
 }
