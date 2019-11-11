@@ -14,20 +14,20 @@
         </plugins>
     </build>
     <parent>
-		<groupId>org.shirdrn.dm</groupId>
-		<artifactId>dm-clustering</artifactId>
+		<groupId>org.cug.photoncounting</groupId>
+		<artifactId>photon-couting-bathymetry</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>dm-clustering-kmeans</artifactId>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.shirdrn.dm</groupId>
+			<groupId>org.cug.photoncounting</groupId>
 			<artifactId>dm-clustering-commons</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.shirdrn.dm</groupId>
+			<groupId>org.cug.photoncounting</groupId>
 			<artifactId>dm-clustering-tool</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
