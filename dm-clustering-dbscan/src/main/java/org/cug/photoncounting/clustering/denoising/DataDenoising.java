@@ -7,9 +7,15 @@ import org.cug.photoncounting.clustering.common.Point2D;
 import org.cug.photoncounting.clustering.common.utils.FileUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.*;
 
 
+/**
+ * @author TJH
+ */
 public class DataDenoising {
 
     private static final Log LOG = LogFactory.getLog(DataDenoising.class);
@@ -19,7 +25,7 @@ public class DataDenoising {
     /**
      * 读取源文件数据点信息
      *
-     * @param files
+     * @param files 源文件
      */
     private void getAllPoints(File... files) {
         FileUtils.read2DPointsFromFiles(allPoints, "[\t,;\\s]+", files);
@@ -33,10 +39,10 @@ public class DataDenoising {
         for (int i = 0; i < allPoints.size(); i++) {
             copy.add((Point2D) allPoints.get(i).clone());
         }
-        Collections.sort(copy, (o1, o2) -> o1.getY().compareTo(o2.getY()));
+        copy.sort((o1, o2) -> o1.getY().compareTo(o2.getY()));
         minY = copy.get(0).getY();
         maxY = copy.get(copy.size() - 1).getY();
-        Collections.sort(copy, (o1, o2) -> o1.getX().compareTo(o2.getX()));
+        copy.sort((o1, o2) -> o1.getX().compareTo(o2.getX()));
         minX = copy.get(0).getX();
         maxX = copy.get(copy.size() - 1).getX();
     }
@@ -44,15 +50,23 @@ public class DataDenoising {
     /**
      * 密度分布直方图粗去噪
      *
-     * @param width
-     * @param height
+     * @param threshold 有效信号概率分布需达到的阈值
+     * @param width     统计块宽
+     * @param height    统计块高
      */
     private void denoising(double width, double height, double threshold) {
         LOG.info("---start denoising---");
 
+        try {
+            FileOutputStream bos = new FileOutputStream(new File(FileUtils.getDbscanDataRootDir(), "output.txt"));
+            System.setOut(new PrintStream(bos));
+        } catch (FileNotFoundException e) {
+            LOG.error(e.getMessage());
+        }
+
         double startX = allPoints.get(0).getX();
         int flag = 0;
-        while(startX <= maxX){
+        while (startX <= maxX) {
 
             double endX = startX + width;
             List<Point2D> tempPoints = Lists.newArrayList();
@@ -64,7 +78,7 @@ public class DataDenoising {
                     break;
                 }
             }
-            Map<Integer, Integer> map = new HashMap<>();
+            Map<Integer, Integer> map = new TreeMap<>();
             for (Point2D tempPoint : tempPoints) {
                 int index = (int) Math.ceil(tempPoint.getY() / height);
                 map.merge(index, 1, Integer::sum);
@@ -75,35 +89,34 @@ public class DataDenoising {
                 sum += value;
             }
             double minThreshold = threshold * sum;
+            // TODO
             for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-                if ((double)entry.getValue() <= minThreshold) {
+                if ((double) entry.getValue() <= minThreshold) {
                     entry.setValue(0);
                 }
             }
 
             for (Point2D tempPoint : tempPoints) {
-                if(map.get((int) Math.ceil(tempPoint.getY() / height))!=0) {
-                    System.out.println(tempPoint.getX()+" "+tempPoint.getY()+" "+1);
-                }else{
-                    System.out.println(tempPoint.getX()+" "+tempPoint.getY()+" "+-1);
+                if (map.get((int) Math.ceil(tempPoint.getY() / height)) != 0) {
+                    System.out.println(tempPoint.getX() + " " + tempPoint.getY() + " " + 1);
+                } else {
+                    System.out.println(tempPoint.getX() + " " + tempPoint.getY() + " " + -1);
                 }
             }
 
             tempPoints.clear();
             map.clear();
 
-            startX+=width;
+            startX += width;
         }
 
         LOG.info("---end denoising---");
     }
 
-
     public static void main(String[] args) {
         DataDenoising d = new DataDenoising();
         d.getAllPoints(new File(FileUtils.getDbscanDataRootDir(), "origin.txt"));
         d.getRange();
-        d.denoising(0.1, 0.1, 0.2);
-        System.out.println("1");
+        d.denoising(0.05, 0.2, 0.1);
     }
 }

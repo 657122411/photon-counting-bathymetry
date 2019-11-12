@@ -104,27 +104,21 @@ public class DataDenoisingXYChart extends JFrame implements ClusteringXYChart {
         this.clusterPointFile = clusterPointFile;
     }
 
-    private static File getClusterPointFile(String[] args, String dir, int minPts, double eps) {
+    private static File getClusterPointFile(String[] args, String dir) {
         if (args.length > 0) {
             return new File(args[0]);
         }
-        return new File(new File(dir), "out.txt");
+        return new File(new File(dir), "output.txt");
     }
 
     public static void main(String args[]) {
-//		int minPts = 4;
-//		double eps = 0.0025094814205335555;
-//		double eps = 0.004417483559674606;
-//		double eps = 0.006147849217403014;
 
-        int minPts = 8;
-//		double eps = 0.004900098978598581;
-//		double eps = 0.009566439044911;
-        double eps = 0.013621050253196359;
+        double width = 0.1;
+        double height = 0.1;
 
-        String chartTitle = "DBSCAN [Eps=" + eps + ", MinPts=" + minPts + "]";
+        String chartTitle = "Denoising [width=" + width + ", height=" + height + "]";
         String dir = FileUtils.getDbscanDataRootDir().getAbsolutePath();
-        File clusterPointFile = getClusterPointFile(args, dir, minPts, eps);
+        File clusterPointFile = getClusterPointFile(args, dir);
 
         final org.cug.photoncounting.clustering.denoising.DataDenoisingXYChart chart =
                 new org.cug.photoncounting.clustering.denoising.DataDenoisingXYChart(chartTitle);
