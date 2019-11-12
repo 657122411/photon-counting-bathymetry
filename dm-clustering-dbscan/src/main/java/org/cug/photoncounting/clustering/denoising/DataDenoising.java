@@ -10,7 +10,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -64,7 +68,7 @@ public class DataDenoising {
             LOG.error(e.getMessage());
         }
 
-        double startX = allPoints.get(0).getX();
+        double startX = minX;
         int flag = 0;
         while (startX <= maxX) {
 
@@ -79,19 +83,35 @@ public class DataDenoising {
                 }
             }
             Map<Integer, Integer> map = new TreeMap<>();
+            for (int i = (int) Math.ceil(minY / height); i <= (int) Math.ceil(maxY / height); i++) {
+                map.put(i, 0);
+            }
+
             for (Point2D tempPoint : tempPoints) {
                 int index = (int) Math.ceil(tempPoint.getY() / height);
                 map.merge(index, 1, Integer::sum);
             }
 
+            //取value最大峰值
+            /*AtomicInteger maxKey = new AtomicInteger();
+            map.entrySet().stream().max(Map.Entry.comparingByValue()).ifPresent(maxEntry -> {
+                        maxKey.set(maxEntry.getKey());
+                    });*/
+
+            AtomicInteger maxKey = new AtomicInteger((int) Math.ceil(minY / height));
+
+            //空中部分做统计分布
             int sum = 0;
-            for (Integer value : map.values()) {
-                sum += value;
+            for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+                if (entry.getKey() >= maxKey.intValue()) {
+                    sum += entry.getValue();
+                }
             }
             double minThreshold = threshold * sum;
-            // TODO
+
+            //对空中噪声去噪
             for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-                if ((double) entry.getValue() <= minThreshold) {
+                if (entry.getKey() > maxKey.intValue() && (double) entry.getValue() < minThreshold) {
                     entry.setValue(0);
                 }
             }
@@ -117,6 +137,6 @@ public class DataDenoising {
         DataDenoising d = new DataDenoising();
         d.getAllPoints(new File(FileUtils.getDbscanDataRootDir(), "origin.txt"));
         d.getRange();
-        d.denoising(0.05, 0.2, 0.1);
+        d.denoising(0.04, 0.05, 0.01);
     }
 }
