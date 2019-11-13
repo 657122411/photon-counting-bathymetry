@@ -70,6 +70,7 @@ public class DataDenoising {
 
         double startX = minX;
         int flag = 0;
+        // minX===>maxX 分块
         while (startX <= maxX) {
 
             double endX = startX + width;
@@ -77,11 +78,13 @@ public class DataDenoising {
             for (int i = flag; i < allPoints.size(); i++) {
                 if (allPoints.get(i).getX() >= startX && allPoints.get(i).getX() <= endX) {
                     tempPoints.add(allPoints.get(i));
+                    //记录下已处理的点index
                     flag++;
                 } else {
                     break;
                 }
             }
+            //minY===>maxY分块，统计分布频数
             Map<Integer, Integer> map = new TreeMap<>();
             for (int i = (int) Math.ceil(minY / height); i <= (int) Math.ceil(maxY / height); i++) {
                 map.put(i, 0);
@@ -100,22 +103,26 @@ public class DataDenoising {
 
             AtomicInteger maxKey = new AtomicInteger((int) Math.ceil(minY / height));
 
-            //空中部分做统计分布
+            //选中部分做累计频数和
             int sum = 0;
             for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
                 if (entry.getKey() >= maxKey.intValue()) {
                     sum += entry.getValue();
                 }
             }
+
+            //概率分布阈值频数
             double minThreshold = threshold * sum;
 
-            //对空中噪声去噪
+            //对选中部分做噪声去噪===》置零
             for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
                 if (entry.getKey() > maxKey.intValue() && (double) entry.getValue() < minThreshold) {
                     entry.setValue(0);
                 }
             }
 
+
+            //输出
             for (Point2D tempPoint : tempPoints) {
                 if (map.get((int) Math.ceil(tempPoint.getY() / height)) != 0) {
                     System.out.println(tempPoint.getX() + " " + tempPoint.getY() + " " + 1);
@@ -124,6 +131,7 @@ public class DataDenoising {
                 }
             }
 
+            //清空临时容器
             tempPoints.clear();
             map.clear();
 
