@@ -2,6 +2,10 @@ package org.cug.photoncounting.clustering.common;
 
 import java.io.File;
 
+/**
+ * 聚类 接口
+ * @param <P>
+ */
 public interface Clustering<P> {
 
     void clustering();

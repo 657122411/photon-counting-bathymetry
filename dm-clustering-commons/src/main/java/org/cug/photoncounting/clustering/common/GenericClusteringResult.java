@@ -16,6 +16,7 @@ public class GenericClusteringResult<P> implements ClusteringResult<P> {
         return clusteredPoints;
     }
 
+    @Override
     public void setClusteredPoints(Map<Integer, Set<ClusterPoint<P>>> clusteredPoints) {
         this.clusteredPoints = clusteredPoints;
     }

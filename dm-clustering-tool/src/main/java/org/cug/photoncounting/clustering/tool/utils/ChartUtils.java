@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.*;
 import java.util.Map.Entry;
 
+/**
+ * 作图工具类
+ */
 public class ChartUtils {
 
     private static final Random RAND = new Random(System.currentTimeMillis());

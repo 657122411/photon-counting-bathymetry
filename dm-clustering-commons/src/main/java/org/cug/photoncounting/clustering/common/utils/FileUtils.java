@@ -16,11 +16,19 @@ import java.util.Set;
 public class FileUtils {
 
 
+    /**
+     * 获取dbscan数据根目录
+     * @return file
+     */
     public static File getDbscanDataRootDir() {
         return new File(System.getProperty("user.dir") + File.separatorChar + "dm-clustering-dbscan" +
                 File.separatorChar + "src" + File.separatorChar + "main" + File.separatorChar + "data");
     }
 
+    /**
+     * 获取kmeans数据根目录
+     * @return file
+     */
     public static File getKmeansDataRootDir() {
         return new File(System.getProperty("user.dir") + File.separatorChar + "dm-clustering-kmeans" +
                 File.separatorChar + "src" + File.separatorChar + "main" + File.separatorChar + "data");
@@ -29,9 +37,9 @@ public class FileUtils {
     /**
      * Read lines from files, and parse line to create {@link Point2D} types' objects.
      *
-     * @param points
-     * @param delimiterRegex
-     * @param files
+     * @param points 存入地
+     * @param delimiterRegex 读取时分隔符
+     * @param files 读取文件
      */
     public static void read2DPointsFromFiles(final List<Point2D> points, String delimiterRegex, File... files) {
         BufferedReader reader = null;
@@ -56,6 +64,13 @@ public class FileUtils {
         }
     }
 
+    /**
+     * 从文件中读取已聚类的点信息
+     * @param points 非噪声点存放地
+     * @param noisePoints 噪点存放
+     * @param delimiterRegex 读取分隔符
+     * @param pointFile 源文件
+     */
     public static void read2DClusterPointsFromFile(final Map<Integer, Set<ClusterPoint2D>> points,
                                                    final Set<ClusterPoint2D> noisePoints, String delimiterRegex, File pointFile) {
         BufferedReader reader = null;
@@ -120,6 +135,10 @@ public class FileUtils {
         }
     }
 
+    /**
+     * finally语句中的close方法也可能会抛出IOException异常
+     * @param closeables 接口
+     */
     public static void closeQuietly(Closeable... closeables) {
         if (closeables != null) {
             for (Closeable closeable : closeables) {

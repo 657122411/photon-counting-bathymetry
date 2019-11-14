@@ -1,6 +1,8 @@
 package org.cug.photoncounting.clustering.common;
 
-
+/**
+ * 类型 + 点 = 聚类点信息
+ */
 public class ClusterPoint2D implements ClusterPoint<Point2D> {
 
     private int clusterId;

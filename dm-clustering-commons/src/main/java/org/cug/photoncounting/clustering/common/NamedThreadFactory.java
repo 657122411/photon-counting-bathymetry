@@ -4,6 +4,9 @@ import java.text.DecimalFormat;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 线程工厂类
+ */
 public class NamedThreadFactory implements ThreadFactory {
 
     static final AtomicInteger poolNumber = new AtomicInteger(1);
@@ -28,10 +31,12 @@ public class NamedThreadFactory implements ThreadFactory {
     public Thread newThread(Runnable r) {
         String threadName = poolName + "-" + formatter.format(threadNumber.getAndIncrement());
         Thread t = new Thread(group, r, threadName, 0);
-        if (t.isDaemon())
+        if (t.isDaemon()) {
             t.setDaemon(false);
-        if (t.getPriority() != Thread.NORM_PRIORITY)
+        }
+        if (t.getPriority() != Thread.NORM_PRIORITY) {
             t.setPriority(Thread.NORM_PRIORITY);
+        }
         return t;
     }
 

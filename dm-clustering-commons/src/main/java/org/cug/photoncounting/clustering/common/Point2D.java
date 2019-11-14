@@ -1,5 +1,8 @@
 package org.cug.photoncounting.clustering.common;
 
+/**
+ * 点 x + y
+ */
 public class Point2D implements Cloneable {
 
     protected final Double x;

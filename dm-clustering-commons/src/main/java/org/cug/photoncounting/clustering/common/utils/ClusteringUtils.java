@@ -10,6 +10,10 @@ import java.util.Set;
 
 public class ClusteringUtils {
 
+    /**
+     * 输出点聚类后信息 x y type
+     * @param clusterPoints 已聚类后的点
+     */
     public static void print2DClusterPoints(Map<Integer, Set<ClusterPoint<Point2D>>> clusterPoints) {
         Iterator<Entry<Integer, Set<ClusterPoint<Point2D>>>> iter = clusterPoints.entrySet().iterator();
         while (iter.hasNext()) {

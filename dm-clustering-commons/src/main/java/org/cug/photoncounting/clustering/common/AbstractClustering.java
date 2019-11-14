@@ -2,6 +2,10 @@ package org.cug.photoncounting.clustering.common;
 
 import java.io.File;
 
+/**
+ * 抽象类 聚类
+ * @param <P>
+ */
 public abstract class AbstractClustering<P> implements Clustering<P> {
 
     protected File[] inputFiles;
