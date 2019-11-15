@@ -25,6 +25,10 @@ public class DBSCANClustering extends Clustering2D {
     private final EpsEstimator epsEstimator;
     private final Map<Point2D, Set<Point2D>> corePointWithNeighbours = Maps.newHashMap();
     private final Set<Point2D> outliers = Sets.newHashSet();
+    /**
+     * 使一个线程等待其他线程各自执行完毕后再执行。
+     * 是通过一个计数器来实现的，计数器的初始值是线程的数量。每当一个线程执行完毕后，计数器的值就-1，当计数器的值为0时，表示所有线程都执行完毕，然后在闭锁上等待的线程就可以恢复工作了。
+     */
     private final CountDownLatch latch;
     private final ExecutorService executorService;
     private final BlockingQueue<Point2D> taskQueue;
@@ -47,12 +51,18 @@ public class DBSCANClustering extends Clustering2D {
         epsEstimator.computeKDistance(inputFiles).estimateEps();
     }
 
+    /**
+     * 核心代码：聚类
+     */
     @Override
     public void clustering() {
         // recognize core points
+        //核心点提取（会将边界点先置入噪点集）
         try {
             for (int i = 0; i < parallism; i++) {
+                //线程任务类
                 CorePointCalculator calculator = new CorePointCalculator();
+                //多线程执行器
                 executorService.execute(calculator);
                 LOG.info("Core point calculator started: " + calculator);
             }
@@ -79,6 +89,7 @@ public class DBSCANClustering extends Clustering2D {
         LOG.info("Point statistics: corePointSize=" + corePointWithNeighbours.keySet().size());
 
         // join connected core points
+        //连接中心点
         LOG.info("Joining connected core points ...");
         final Map<Point2D, Set<Point2D>> clusteringPoints = Maps.newHashMap();
         Set<Point2D> corePoints = Sets.newHashSet(corePointWithNeighbours.keySet());
@@ -88,12 +99,16 @@ public class DBSCANClustering extends Clustering2D {
             if (iter.hasNext()) {
                 Point2D p = iter.next();
                 iter.remove();
+                //核心点间距小于eps为同簇，加入到集合connectedPoints
                 Set<Point2D> connectedPoints = joinConnectedCorePoints(p, corePoints);
+                //暂时移动到se集合中
                 set.addAll(connectedPoints);
                 while (!connectedPoints.isEmpty()) {
+                    //确定p1周围需要连接的核心点后，话要把和这些周围一圈直接密度可达的点加入集合set
                     connectedPoints = joinConnectedCorePoints(connectedPoints, corePoints);
                     set.addAll(connectedPoints);
                 }
+                //该点对应的直接间接可达核心点加入Map<Point2D, Set<Point2D>>
                 clusteringPoints.put(p, set);
             } else {
                 break;
@@ -102,10 +117,13 @@ public class DBSCANClustering extends Clustering2D {
         LOG.info("Connected core points computed.");
 
         // process outliers
+        //噪声点集需要去除边界点
         Iterator<Point2D> iter = outliers.iterator();
         while (iter.hasNext()) {
             Point2D np = iter.next();
+            //噪点集的点出现在核心点临点集中
             if (corePointWithNeighbours.containsKey(np)) {
+                //非噪点
                 iter.remove();
             } else {
                 for (Set<Point2D> set : corePointWithNeighbours.values()) {
@@ -118,20 +136,24 @@ public class DBSCANClustering extends Clustering2D {
         }
 
         // generate clustering result
+        //生成聚类结果，主要将clusteringPoints（点，set）转化为clusteredPoints（id,set）
         Iterator<Entry<Point2D, Set<Point2D>>> coreIter = clusteringPoints.entrySet().iterator();
         int id = 0;
         while (coreIter.hasNext()) {
             Entry<Point2D, Set<Point2D>> core = coreIter.next();
             Set<Point2D> set = Sets.newHashSet();
+            //会把自身点放入
             set.add(core.getKey());
             set.addAll(corePointWithNeighbours.get(core.getKey()));
             for (Point2D p : core.getValue()) {
                 set.addAll(core.getValue());
+                //边界点可能属于多个簇，寻找簇中已知点的所有边界点
                 set.addAll(corePointWithNeighbours.get(p));
             }
 
             Set<ClusterPoint<Point2D>> clusterSet = Sets.newHashSet();
             for (Point2D p : set) {
+                //赋值属性id做分簇
                 clusterSet.add(new ClusterPoint2D(p, id));
             }
             clusteredPoints.put(id, clusterSet);
@@ -185,6 +207,7 @@ public class DBSCANClustering extends Clustering2D {
                     while (!taskQueue.isEmpty()) {
                         Point2D p1 = taskQueue.poll();
                         ++processedPoints;
+                        //计算点p1与另外点距离，如小于阈值eps则将点2放入set
                         Set<Point2D> set = Sets.newHashSet();
                         Iterator<Point2D> iter = epsEstimator.allPointIterator();
                         while (iter.hasNext()) {
@@ -199,11 +222,13 @@ public class DBSCANClustering extends Clustering2D {
                         }
                         // decide whether p1 is core point
                         if (set.size() >= minPts) {
+                            //若点2的集合大于阈值minpts,则p1为核心点，将p1，所属点集放入hashmap
                             corePointWithNeighbours.put(p1, set);
                             LOG.debug("Decide core point: point" + p1 + ", set=" + set);
                         } else {
                             // here, perhaps a point was wrongly put into outliers set
                             // afterwards we should remedy outliers set
+                            //若p1不满足他所属范围点大于阈值，将其置入噪点集
                             if (!outliers.contains(p1)) {
                                 outliers.add(p1);
                             }
@@ -261,6 +286,7 @@ public class DBSCANClustering extends Clustering2D {
         ClusteringUtils.print2DClusterPoints(result.getClusteredPoints());
 
         // print outliers
+        // 噪点集赋簇值为-1
         int outliersClusterId = -1;
         System.out.println("== Outliers ==");
         for (Point2D p : c.getOutliers()) {
