@@ -108,7 +108,7 @@ public class DataDenoisingXYChart extends JFrame implements ClusteringXYChart {
         if (args.length > 0) {
             return new File(args[0]);
         }
-        return new File(new File(dir), "output.txt");
+        return new File(new File(dir), "DataDenoisingOutput.txt");
     }
 
     public static void main(String args[]) {

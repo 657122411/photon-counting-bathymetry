@@ -147,6 +147,6 @@ public class DataDenoising {
         DataDenoising d = new DataDenoising();
         d.getAllPoints(new File(FileUtils.getDbscanDataRootDir(), "DataDenoisingInput.txt"));
         d.getRange();
-        d.denoising(0.04, 0.05, 0.01);
+        d.denoising(0.02, 2, 0.02);
     }
 }

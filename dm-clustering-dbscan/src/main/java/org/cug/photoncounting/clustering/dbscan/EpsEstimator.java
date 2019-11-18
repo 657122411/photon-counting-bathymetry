@@ -52,6 +52,13 @@ public class EpsEstimator {
         this.isOutputKDsitance = isOutputKDsitance;
     }
 
+
+    /**
+     * 计算K-dist
+     *
+     * @param files
+     * @return
+     */
     public EpsEstimator computeKDistance(File... files) {
         // parse sample files
         FileUtils.read2DPointsFromFiles(allPoints, "[\t,;\\s]+", files);
@@ -128,6 +135,12 @@ public class EpsEstimator {
         return calculators.get(index);
     }
 
+
+    /**
+     * 计算k-dist的线程
+     * 每个点都要计算k-距离，在计算一个点的k-距离的时候，首先要计算该点到其他所有点的欧几里德距离，
+     * 按照距离升序排序后，选择第k小的距离作为k-距离的值
+     */
     private class KDistanceCalculator extends Thread {
 
         private final Log LOG = LogFactory.getLog(KDistanceCalculator.class);
@@ -143,8 +156,10 @@ public class EpsEstimator {
                 while (!completeToAssignTask) {
                     try {
                         while (!q.isEmpty()) {
+                            // 从队列q中取出一个Task，就是计算一个点的k-距离的任务
                             Task task = q.poll();
                             final KPoint2D p1 = (KPoint2D) task.kp;
+                            // 创建一个降序排序TreeSet
                             final TreeSet<Double> sortedDistances = Sets.newTreeSet(new Comparator<Double>() {
 
                                 @Override
@@ -160,24 +175,30 @@ public class EpsEstimator {
                                 }
 
                             });
+                            // 计算点p1与allPoints集合中每个点的k-距离
                             for (int i = 0; i < allPoints.size(); i++) {
+                                // 点p1与它自己的欧几里德距离没必要计算
                                 if (task.pos != i) {
                                     final Point2D p2 = allPoints.get(i);
+                                    // 从缓存中取出欧几里德距离（可能不存在）
                                     Double distance = distanceCache.computeDistance((Point2D) p1, (Point2D) p2);
 
                                     if (!sortedDistances.contains(distance)) {
                                         sortedDistances.add(distance);
                                     }
+                                    // TreeSet中只最多保留k个欧几里德距离值
                                     if (sortedDistances.size() > k) {
                                         Iterator<Double> iter = sortedDistances.iterator();
                                         iter.next();
                                         // remove (k+1)th minimum distance
+                                        // 将k+1个距离值中最大的删除，剩余k个是最小的
                                         iter.remove();
                                     }
                                 }
                             }
 
                             // collect k-distance
+                            // 此时，TreeSet中最大的，就是第k最小的距离
                             p1.kDistance = sortedDistances.iterator().next();
                             LOG.debug("Processed, point=(" + p1 + "), k-distance=" + p1.kDistance);
                         }
