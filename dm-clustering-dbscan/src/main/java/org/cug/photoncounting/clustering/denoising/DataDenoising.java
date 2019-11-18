@@ -61,8 +61,9 @@ public class DataDenoising {
     private void denoising(double width, double height, double threshold) {
         LOG.info("---start denoising---");
 
+        PrintStream out = System.out;
         try {
-            FileOutputStream bos = new FileOutputStream(new File(FileUtils.getDbscanDataRootDir(), "output.txt"));
+            FileOutputStream bos = new FileOutputStream(new File(FileUtils.getDbscanDataRootDir(), "DataDenoisingOutput.txt"));
             System.setOut(new PrintStream(bos));
         } catch (FileNotFoundException e) {
             LOG.error(e.getMessage());
@@ -138,12 +139,13 @@ public class DataDenoising {
             startX += width;
         }
 
+        System.setOut(out);
         LOG.info("---end denoising---");
     }
 
     public static void main(String[] args) {
         DataDenoising d = new DataDenoising();
-        d.getAllPoints(new File(FileUtils.getDbscanDataRootDir(), "origin.txt"));
+        d.getAllPoints(new File(FileUtils.getDbscanDataRootDir(), "DataDenoisingInput.txt"));
         d.getRange();
         d.denoising(0.04, 0.05, 0.01);
     }
