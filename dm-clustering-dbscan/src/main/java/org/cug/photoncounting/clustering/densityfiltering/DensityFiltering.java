@@ -45,11 +45,11 @@ public class DensityFiltering extends Clustering2D {
     private volatile boolean completed = false;
     private int clusterCount;
 
-    public DensityFiltering(int minPts, int parallism) {
+    public DensityFiltering(int minPts, int parallism, double epsA, double epsB) {
         super(parallism);
         Preconditions.checkArgument(minPts > 0, "Required: minPts > 0!");
         this.minPts = minPts;
-        epsEstimator = new ABEpsEstimator(minPts, parallism);
+        epsEstimator = new ABEpsEstimator(minPts, parallism, epsA, epsB);
         latch = new CountDownLatch(parallism);
         executorService = Executors.newCachedThreadPool(new NamedThreadFactory("CORE"));
         taskQueue = new LinkedBlockingQueue<Point2D>();
@@ -185,7 +185,11 @@ public class DensityFiltering extends Clustering2D {
         Set<Point2D> set = Sets.newHashSet();
         for (Point2D p2 : leftCorePoints) {
             double distance = epsEstimator.getDistanceCache().computeDistance(p1, p2);
-            if (distance <= epsA) {
+
+            //根据两点夹角确定实际eps距离
+            double ellipseDist = epsEstimator.getDistanceCache().computeEllipseDist(p1, p2);
+
+            if (distance <= ellipseDist) {
                 // join 2 core points to the same cluster
                 set.add(p2);
             }
@@ -227,12 +231,7 @@ public class DensityFiltering extends Clustering2D {
                                 double distance = epsEstimator.getDistanceCache().computeDistance(p1, p2);
 
                                 //根据两点夹角确定实际eps距离
-                                double theta = Math.atan((p2.getY() - p1.getY()) / (p2.getX() - p1.getX()));
-                                double ellipseDist = Math.sqrt((epsA * epsA * epsB * epsB) / (epsB * epsB +
-                                        epsA * epsA * Math.tan(theta) * Math.tan(theta)) +
-                                        (epsA * epsA * epsB * epsB * Math.tan(theta) * Math.tan(theta)) / (epsB * epsB
-                                                + epsA * epsA * Math.tan(theta) * Math.tan(theta)));
-
+                                double ellipseDist = epsEstimator.getDistanceCache().computeEllipseDist(p1, p2);
 
                                 // collect a point belonging to the point p1
                                 if (distance <= ellipseDist) {
@@ -291,13 +290,16 @@ public class DensityFiltering extends Clustering2D {
         double epsA = 0.009566439044911;
 //		double epsA = 0.013621050253196359;
 
-        DensityFiltering c = new DensityFiltering(minPts, 8);
+        double epsB = 0.009166439044911;
+
+        DensityFiltering c = new DensityFiltering(minPts, 8, epsA, epsB);
         c.setInputFiles(new File(FileUtils.getDbscanDataRootDir(), "DensityFilteringInput.txt"));
+
         c.getEpsEstimator().setOutputKDsitance(false);
         c.generateSortedKDistances();
 
         // execute clustering procedure
-        c.setEps(epsA, epsA / 2);
+        c.setEps(epsA, epsB);
         c.setMinPts(4);
         c.clustering();
 

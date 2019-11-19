@@ -7,6 +7,7 @@ public class MetricUtils {
 
     /**
      * 计算欧式距离
+     *
      * @param p1 点1
      * @param p2 点2
      * @return double
@@ -20,7 +21,28 @@ public class MetricUtils {
     }
 
     /**
+     * 计算两点在椭圆上的截断距离
+     *
+     * @param p1   点1
+     * @param p2   点2
+     * @param epsA 椭圆长轴
+     * @param epsB 椭圆短轴
+     * @return 截断距离
+     */
+    public static double ellipseDistance(Point2D p1, Point2D p2, double epsA, double epsB) {
+        //根据两点夹角确定实际eps距离
+        double theta = Math.atan((p2.getY() - p1.getY()) / (p2.getX() - p1.getX()));
+        double ellipseDist2 = (epsA * epsA * epsB * epsB) / (epsB * epsB +
+                epsA * epsA * Math.tan(theta) * Math.tan(theta)) +
+                (epsA * epsA * epsB * epsB * Math.tan(theta) * Math.tan(theta)) / (epsB * epsB
+                        + epsA * epsA * Math.tan(theta) * Math.tan(theta));
+
+        return Math.sqrt(ellipseDist2);
+    }
+
+    /**
      * kmeans计算平均质心
+     *
      * @param points 点s
      * @return 质心点
      */

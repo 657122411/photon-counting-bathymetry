@@ -30,15 +30,16 @@ public class ABEpsEstimator {
     private volatile boolean completeToAssignTask = false;
     private boolean isOutputKDsitance = true;
 
-    public ABEpsEstimator() {
+    /*public ABEpsEstimator() {
         this(4, 5);
-    }
+    }*/
 
-    public ABEpsEstimator(int k, int parallism) {
+    public ABEpsEstimator(int k, int parallism, double epsA, double epsB) {
         super();
         this.k = k;
         this.parallism = parallism;
-        distanceCache = new DistanceCache(Integer.MAX_VALUE);
+        //传入椭圆ab
+        distanceCache = new DistanceCache(Integer.MAX_VALUE, epsA, epsB);
         latch = new CountDownLatch(parallism);
         executorService = Executors.newCachedThreadPool(new NamedThreadFactory("KDCALC"));
         LOG.info("Config: k=" + k + ", parallism=" + parallism);
