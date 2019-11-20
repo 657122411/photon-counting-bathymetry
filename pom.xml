@@ -2,15 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cug.photoncounting</groupId>
-    <artifactId>photon-couting-bathymetry</artifactId>
+    <artifactId>photon-counting-bathymetry</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>photon-couting-bathymetry</name>
+    <name>photon-counting-bathymetry</name>
     <modules>
-        <module>dm-clustering-dbscan</module>
-        <module>dm-clustering-commons</module>
-        <module>dm-clustering-tool</module>
-        <module>dm-clustering-kmeans</module>
+        <module>photon-counting-dbscan</module>
+        <module>photon-counting-commons</module>
+        <module>photon-counting-tool</module>
+        <module>photon-counting-kmeans</module>
     </modules>
 
     <dependencies>
