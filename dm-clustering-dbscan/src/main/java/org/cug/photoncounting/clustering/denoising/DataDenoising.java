@@ -96,28 +96,27 @@ public class DataDenoising {
                 map.merge(index, 1, Integer::sum);
             }
 
-            //取value最大峰值
-            /*AtomicInteger maxKey = new AtomicInteger();
-            map.entrySet().stream().max(Map.Entry.comparingByValue()).ifPresent(maxEntry -> {
-                        maxKey.set(maxEntry.getKey());
-                    });*/
-
-            AtomicInteger maxKey = new AtomicInteger((int) Math.ceil(minY / height));
-
-            //选中部分做累计频数和
+            //统计该块累计频数和
             int sum = 0;
             for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-                if (entry.getKey() >= maxKey.intValue()) {
-                    sum += entry.getValue();
-                }
+                sum += entry.getValue();
             }
 
             //概率分布阈值频数
             double minThreshold = threshold * sum;
 
-            //对选中部分做噪声去噪===》置零
+            //取value最大峰值 即水陆交界
+            AtomicInteger maxKey = new AtomicInteger();
+            map.entrySet().stream().max(Map.Entry.comparingByValue()).ifPresent(maxEntry -> {
+                maxKey.set(maxEntry.getKey());
+            });
+            //AtomicInteger maxKey = new AtomicInteger((int) Math.ceil(minY / height));
+
+            //对空中/水中做噪声去噪===》置零
             for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-                if (entry.getKey() > maxKey.intValue() && (double) entry.getValue() < minThreshold) {
+                if (entry.getKey() < maxKey.intValue() && (double) entry.getValue() < minThreshold) {
+                    entry.setValue(0);
+                } else if (entry.getKey() > maxKey.intValue() && (double) entry.getValue() < 2 * minThreshold) {
                     entry.setValue(0);
                 }
             }

@@ -113,10 +113,11 @@ public class DataDenoisingXYChart extends JFrame implements ClusteringXYChart {
 
     public static void main(String args[]) {
 
-        double width = 0.1;
-        double height = 0.1;
+        double width = 0.02;
+        double height = 2;
+        double threshold = 0.02;
 
-        String chartTitle = "Denoising [width=" + width + ", height=" + height + "]";
+        String chartTitle = "Denoising [width=" + width + ", height=" + height + ", threshold=" + threshold + "]";
         String dir = FileUtils.getDbscanDataRootDir().getAbsolutePath();
         File clusterPointFile = getClusterPointFile(args, dir);
 
