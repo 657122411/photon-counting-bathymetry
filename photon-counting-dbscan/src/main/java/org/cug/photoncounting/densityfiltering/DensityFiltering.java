@@ -308,10 +308,10 @@ public class DensityFiltering extends Clustering2D {
 
         int minPts = 8;
 //		double epsA = 0.004900098978598581;
-        double epsA = 0.009566439044911;
+        double epsA = 0.0075;
 //		double epsA = 0.013621050253196359;
 
-        double epsB = 0.009166439044911;
+        double epsB = 0.1;
 
         //获取cpu核心数
         final int availProcessors = Runtime.getRuntime().availableProcessors();

@@ -122,9 +122,10 @@ public class DensityFilteringXYChart extends JFrame implements ClusteringXYChart
         int minPts = 8;
 //		double eps = 0.004900098978598581;
 //		double eps = 0.009566439044911;
-        double eps = 0.013621050253196359;
+        double epsA = 0.0075;
+        double epsB = 0.1;
 
-        String chartTitle = "DensityFiltering [Eps=" + eps + ", MinPts=" + minPts + "]";
+        String chartTitle = "DensityFiltering [a=" + epsA + ", b=" + epsB + ", MinPts=" + minPts + "]";
         String dir = FileUtils.getDbscanDataRootDir().getAbsolutePath();
         File clusterPointFile = getClusterPointFile(args, dir);
 
