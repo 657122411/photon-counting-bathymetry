@@ -22,6 +22,23 @@ import java.util.concurrent.*;
 
 /**
  * 密度滤波实现（椭圆搜索邻域DBSCAN）
+ * ---{预处理：求两两点间距离}---
+ * (1) 首先将数据集D中的所有对象标记为未处理状态
+ * (2) for（数据集D中每个对象p） do
+ * (3)    if （p已经归入某个簇或标记为噪声） then
+ * (4)         continue;
+ * (5)    else
+ * (6)         检查对象p的Eps邻域 NEps(p) ；
+ * (7)         if (NEps(p)包含的对象数小于MinPts) then
+ * (8)                  标记对象p为边界点或噪声点；
+ * (9)         else
+ * (10)                 标记对象p为核心点，并建立新簇C, 并将p邻域内所有点加入C
+ * (11)                 for (NEps(p)中所有尚未被处理的对象q)  do
+ * (12)                       检查其Eps邻域NEps(q)，若NEps(q)包含至少MinPts个对象，则将NEps(q)中未归入任何一个簇的对象加入C；
+ * (13)                 end for
+ * (14)        end if
+ * (15)    end if
+ * (16) end for
  *
  * @author TJH
  */
@@ -277,7 +294,11 @@ public class DensityFiltering extends Clustering2D {
         return outliers;
     }
 
-    // 数据量大的情况下需要设置JVM参数调整最大堆大小-Xms1024m -Xmx3072m
+    /**
+     * 数据量大的情况下需要设置JVM参数调整最大堆大小-Xms??m -Xmx??m
+     *
+     * @param args args
+     */
     public static void main(String[] args) {
         // generate sorted k-distances sequences
 //		int minPts = 4;
@@ -292,7 +313,9 @@ public class DensityFiltering extends Clustering2D {
 
         double epsB = 0.009166439044911;
 
-        DensityFiltering c = new DensityFiltering(minPts, 8, epsA, epsB);
+        //获取cpu核心数
+        final int availProcessors = Runtime.getRuntime().availableProcessors();
+        DensityFiltering c = new DensityFiltering(minPts, availProcessors + 1, epsA, epsB);
         c.setInputFiles(new File(FileUtils.getDbscanDataRootDir(), "DensityFilteringInput.txt"));
 
         c.getEpsEstimator().setOutputKDsitance(false);
