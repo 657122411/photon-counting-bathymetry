@@ -45,15 +45,30 @@ import java.util.concurrent.*;
 public class DensityFiltering extends Clustering2D {
 
     private static final Log LOG = LogFactory.getLog(DensityFiltering.class);
+    /**
+     * 椭圆长轴
+     */
     private double epsA;
+    /**
+     * 椭圆半轴
+     */
     private double epsB;
+    /**
+     * 最小包含点数
+     */
     private int minPts;
     private final ABEpsEstimator epsEstimator;
+    /**
+     * 核心点及其边界点
+     */
     private final Map<Point2D, Set<Point2D>> corePointWithNeighbours = Maps.newHashMap();
+    /**
+     * 离群点
+     */
     private final Set<Point2D> outliers = Sets.newHashSet();
     /**
-     * 使一个线程等待其他线程各自执行完毕后再执行。
-     * 是通过一个计数器来实现的，计数器的初始值是线程的数量。每当一个线程执行完毕后，计数器的值就-1，当计数器的值为0时，表示所有线程都执行完毕，然后在闭锁上等待的线程就可以恢复工作了。
+     * 使一个线程等待其他线程各自执行完毕后再执行。通过一个计数器来实现，初始值是线程的数量，
+     * 每当一个线程执行完毕后，计数器的值就-1，当计数器的值为0时，表示所有线程都执行完毕，然后在闭锁上等待的线程就可以恢复工作了。
      */
     private final CountDownLatch latch;
     private final ExecutorService executorService;
@@ -72,6 +87,9 @@ public class DensityFiltering extends Clustering2D {
         LOG.info("Config: minPts=" + minPts + ", parallism=" + parallism);
     }
 
+    /**
+     * 统计两两点距离，computeKDistance对每个点记录距离其第k近的距离，estimateEps将collection按k-dist小到大排序输出
+     */
     public void generateSortedKDistances() {
         Preconditions.checkArgument(inputFiles != null, "inputFiles == null");
         epsEstimator.computeKDistance(inputFiles).estimateEps();
@@ -189,6 +207,13 @@ public class DensityFiltering extends Clustering2D {
         LOG.info("Finished clustering: clusterCount=" + clusterCount + ", outliersCount=" + outliers.size());
     }
 
+
+    /**
+     * 确定p1周围需要连接的核心点后，话要把和这些周围一圈直接密度可达的点加入集合set
+     * @param connectedPoints 核心点集
+     * @param leftCorePoints 该核心点的边界点集
+     * @return 确定的一个簇点集
+     */
     private Set<Point2D> joinConnectedCorePoints(Set<Point2D> connectedPoints, Set<Point2D> leftCorePoints) {
         Set<Point2D> set = Sets.newHashSet();
         for (Point2D p1 : connectedPoints) {
@@ -197,6 +222,13 @@ public class DensityFiltering extends Clustering2D {
         return set;
     }
 
+
+    /**
+     * 确定p1周围需要连接的核心点后，话要把和这些周围一圈直接密度可达的点加入集合set
+     * @param p1 核心点
+     * @param leftCorePoints 该核心点的边界点集
+     * @return 确定的一个簇点集
+     */
     private Set<Point2D> joinConnectedCorePoints(Point2D p1, Set<Point2D> leftCorePoints) {
         Set<Point2D> set = Sets.newHashSet();
         for (Point2D p2 : leftCorePoints) {
@@ -225,6 +257,9 @@ public class DensityFiltering extends Clustering2D {
     }
 
 
+    /**
+     * 核心点计算线程
+     */
     private final class CorePointCalculator extends Thread {
 
         private final Log LOG = LogFactory.getLog(CorePointCalculator.class);
@@ -301,16 +336,8 @@ public class DensityFiltering extends Clustering2D {
      */
     public static void main(String[] args) {
         // generate sorted k-distances sequences
-//		int minPts = 4;
-//		double epsA = 0.0025094814205335555;
-//		double epsA = 0.004417483559674606;
-//		double epsA = 0.006147849217403014;
-
         int minPts = 8;
-//		double epsA = 0.004900098978598581;
         double epsA = 0.0075;
-//		double epsA = 0.013621050253196359;
-
         double epsB = 0.1;
 
         //获取cpu核心数
@@ -325,7 +352,6 @@ public class DensityFiltering extends Clustering2D {
         c.setEps(epsA, epsB);
         c.setMinPts(4);
         c.clustering();
-
 
         try {
             FileOutputStream bos = new FileOutputStream(new File(FileUtils.getDbscanDataRootDir(), "DensityFilteringOutput.txt"));
