@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileReader;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,7 @@ public class FileUtils {
 
     /**
      * 获取dbscan数据根目录
+     *
      * @return file
      */
     public static File getDbscanDataRootDir() {
@@ -27,6 +29,7 @@ public class FileUtils {
 
     /**
      * 获取kmeans数据根目录
+     *
      * @return file
      */
     public static File getKmeansDataRootDir() {
@@ -37,9 +40,9 @@ public class FileUtils {
     /**
      * Read lines from files, and parse line to create {@link Point2D} types' objects.
      *
-     * @param points 存入地
+     * @param points         存入地
      * @param delimiterRegex 读取时分隔符
-     * @param files 读取文件
+     * @param files          读取文件
      */
     public static void read2DPointsFromFiles(final List<Point2D> points, String delimiterRegex, File... files) {
         BufferedReader reader = null;
@@ -65,11 +68,45 @@ public class FileUtils {
     }
 
     /**
+     * 读入点坐标，单位统一为m
+     *
+     * @param points         存入地
+     * @param delimiterRegex 读取时分隔符
+     * @param files          读取文件
+     */
+    public static void read2DPointsFromFilesWithUnits(final List<Point2D> points, String delimiterRegex, File... files) {
+        BufferedReader reader = null;
+        for (File file : files) {
+            try {
+                reader = new BufferedReader(new FileReader(file.getAbsoluteFile()));
+                String point = null;
+                while ((point = reader.readLine()) != null) {
+                    String[] a = point.split(delimiterRegex);
+                    if (a.length == 2) {
+                        //横坐标单位为千米
+                        DecimalFormat df = new DecimalFormat("0.00");
+                        double d1 = Double.parseDouble(a[0]) * 1000;
+                        Point2D kp = new Point2D(Double.parseDouble(df.format(d1)), Double.parseDouble(a[1]));
+                        if (!points.contains(kp)) {
+                            points.add(kp);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                throw Throwables.propagate(e);
+            } finally {
+                FileUtils.closeQuietly(reader);
+            }
+        }
+    }
+
+    /**
      * 从文件中读取已聚类的点信息
-     * @param points 非噪声点存放地
-     * @param noisePoints 噪点存放
+     *
+     * @param points         非噪声点存放地
+     * @param noisePoints    噪点存放
      * @param delimiterRegex 读取分隔符
-     * @param pointFile 源文件
+     * @param pointFile      源文件
      */
     public static void read2DClusterPointsFromFile(final Map<Integer, Set<ClusterPoint2D>> points,
                                                    final Set<ClusterPoint2D> noisePoints, String delimiterRegex, File pointFile) {
@@ -137,6 +174,7 @@ public class FileUtils {
 
     /**
      * finally语句中的close方法也可能会抛出IOException异常
+     *
      * @param closeables 接口
      */
     public static void closeQuietly(Closeable... closeables) {

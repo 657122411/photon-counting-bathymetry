@@ -337,7 +337,7 @@ public class DensityFiltering extends Clustering2D {
     public static void main(String[] args) {
         // generate sorted k-distances sequences
         int minPts = 8;
-        double epsA = 0.0075;
+        double epsA = 7.5;
         double epsB = 0.1;
 
         //获取cpu核心数

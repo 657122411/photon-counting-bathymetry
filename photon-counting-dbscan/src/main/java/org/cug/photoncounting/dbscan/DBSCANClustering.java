@@ -10,6 +10,9 @@ import org.cug.photoncounting.common.utils.ClusteringUtils;
 import org.cug.photoncounting.common.utils.FileUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -259,6 +262,11 @@ public class DBSCANClustering extends Clustering2D {
         return outliers;
     }
 
+
+    /**
+     * 数据量大需要适当调整JVM参数
+     * @param args args
+     */
     public static void main(String[] args) {
         // generate sorted k-distances sequences
 //		int minPts = 4;
@@ -266,13 +274,16 @@ public class DBSCANClustering extends Clustering2D {
 //		double eps = 0.004417483559674606;
 //		double eps = 0.006147849217403014;
 
-        int minPts = 8;
+//      int minPts = 8;
 //		double eps = 0.004900098978598581;
-        double eps = 0.009566439044911;
+//      double eps = 0.009566439044911;
 //		double eps = 0.013621050253196359;
 
+        int minPts = 8;
+        double eps = 2;
+
         DBSCANClustering c = new DBSCANClustering(minPts, 8);
-        c.setInputFiles(new File(FileUtils.getDbscanDataRootDir(), "xy_zfmx.txt"));
+        c.setInputFiles(new File(FileUtils.getDbscanDataRootDir(), "DensityFilteringInput.txt"));
         c.getEpsEstimator().setOutputKDsitance(false);
         c.generateSortedKDistances();
 
@@ -281,14 +292,21 @@ public class DBSCANClustering extends Clustering2D {
         c.setMinPts(4);
         c.clustering();
 
-        System.out.println("== Clustered points ==");
+        try {
+            FileOutputStream bos = new FileOutputStream(new File(FileUtils.getDbscanDataRootDir(), "DBScanOutput.txt"));
+            System.setOut(new PrintStream(bos));
+        } catch (FileNotFoundException e) {
+            LOG.error(e.getMessage());
+        }
+
+        LOG.info("== Clustered points ==");
         ClusteringResult<Point2D> result = c.getClusteringResult();
         ClusteringUtils.print2DClusterPoints(result.getClusteredPoints());
 
         // print outliers
         // 噪点集赋簇值为-1
         int outliersClusterId = -1;
-        System.out.println("== Outliers ==");
+        LOG.info("== Outliers ==");
         for (Point2D p : c.getOutliers()) {
             System.out.println(p.getX() + "," + p.getY() + "," + outliersClusterId);
         }

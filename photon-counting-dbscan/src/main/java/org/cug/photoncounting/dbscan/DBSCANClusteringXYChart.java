@@ -106,27 +106,20 @@ public class DBSCANClusteringXYChart extends JFrame implements ClusteringXYChart
         this.clusterPointFile = clusterPointFile;
     }
 
-    private static File getClusterPointFile(String[] args, String dir, int minPts, double eps) {
+    private static File getClusterPointFile(String[] args, String dir) {
         if (args.length > 0) {
             return new File(args[0]);
         }
-        return new File(new File(dir), minPts + "_" + eps + ".txt");
+        return new File(new File(dir),  "DBScanOutput.txt");
     }
 
     public static void main(String args[]) {
-//		int minPts = 4;
-//		double eps = 0.0025094814205335555;
-//		double eps = 0.004417483559674606;
-//		double eps = 0.006147849217403014;
-
         int minPts = 8;
-//		double eps = 0.004900098978598581;
-//		double eps = 0.009566439044911;
-        double eps = 0.013621050253196359;
+        double eps = 0.75;
 
         String chartTitle = "DBSCAN [Eps=" + eps + ", MinPts=" + minPts + "]";
         String dir = FileUtils.getDbscanDataRootDir().getAbsolutePath();
-        File clusterPointFile = getClusterPointFile(args, dir, minPts, eps);
+        File clusterPointFile = getClusterPointFile(args, dir);
 
         final DBSCANClusteringXYChart chart = new DBSCANClusteringXYChart(chartTitle);
         chart.setclusterPointFile(clusterPointFile);

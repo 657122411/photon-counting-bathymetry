@@ -15,6 +15,10 @@ import java.util.*;
 import java.util.concurrent.*;
 
 
+/**
+ * 邻域估算器：计算了两两点距，统计K-dist
+ * @author TJH
+ */
 public class ABEpsEstimator {
 
     private static final Log LOG = LogFactory.getLog(ABEpsEstimator.class);
@@ -55,7 +59,7 @@ public class ABEpsEstimator {
 
     public ABEpsEstimator computeKDistance(File... files) {
         // parse sample files
-        FileUtils.read2DPointsFromFiles(allPoints, "[\t,;\\s]+", files);
+        FileUtils.read2DPointsFromFilesWithUnits(allPoints, "[\t,;\\s]+", files);
         // compute k-distance
         try {
             for (int i = 0; i < parallism; i++) {

@@ -61,7 +61,7 @@ public class EpsEstimator {
      */
     public EpsEstimator computeKDistance(File... files) {
         // parse sample files
-        FileUtils.read2DPointsFromFiles(allPoints, "[\t,;\\s]+", files);
+        FileUtils.read2DPointsFromFilesWithUnits(allPoints, "[\t,;\\s]+", files);
         // compute k-distance
         try {
             for (int i = 0; i < parallism; i++) {
