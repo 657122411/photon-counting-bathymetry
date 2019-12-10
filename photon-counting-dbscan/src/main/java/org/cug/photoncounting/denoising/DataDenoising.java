@@ -114,9 +114,9 @@ public class DataDenoising {
 
             //对空中/水中做噪声去噪===》置零
             for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-                if (entry.getKey() < maxKey.intValue() && (double) entry.getValue() < minThreshold) {
+                if (entry.getKey() < maxKey.intValue() && (double) entry.getValue() < 2 * minThreshold) {
                     entry.setValue(0);
-                } else if (entry.getKey() > maxKey.intValue() && (double) entry.getValue() < 2 * minThreshold) {
+                } else if (entry.getKey() > maxKey.intValue() && (double) entry.getValue() < minThreshold) {
                     entry.setValue(0);
                 }
             }
@@ -146,6 +146,6 @@ public class DataDenoising {
         DataDenoising d = new DataDenoising();
         d.getAllPoints(new File(FileUtils.getDbscanDataRootDir(), "DataDenoisingInput.txt"));
         d.getRange();
-        d.denoising(0.02, 2, 0.02);
+        d.denoising(200, 5, 0.05);
     }
 }
