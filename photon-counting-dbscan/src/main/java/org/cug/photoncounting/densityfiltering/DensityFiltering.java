@@ -8,16 +8,16 @@ import org.apache.commons.logging.LogFactory;
 import org.cug.photoncounting.common.*;
 import org.cug.photoncounting.common.utils.ClusteringUtils;
 import org.cug.photoncounting.common.utils.FileUtils;
+import sun.plugin2.jvm.CircularByteBuffer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -125,7 +125,7 @@ public class DensityFiltering extends Clustering2D {
             try {
                 completed = true;
                 latch.await();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
             LOG.info("Shutdown executor service: " + executorService);
             executorService.shutdown();
@@ -148,7 +148,7 @@ public class DensityFiltering extends Clustering2D {
                 //暂时移动到se集合中
                 set.addAll(connectedPoints);
                 while (!connectedPoints.isEmpty()) {
-                    //确定p1周围需要连接的核心点后，话要把和这些周围一圈直接密度可达的点加入集合set
+                    //确定p1周围需要连接的核心点后，还要把和这些周围一圈直接密度可达的点加入集合set
                     connectedPoints = joinConnectedCorePoints(connectedPoints, corePoints);
                     set.addAll(connectedPoints);
                 }
@@ -209,9 +209,10 @@ public class DensityFiltering extends Clustering2D {
 
 
     /**
-     * 确定p1周围需要连接的核心点后，话要把和这些周围一圈直接密度可达的点加入集合set
+     * 确定p1周围需要连接的核心点后，还要把和这些周围一圈直接密度可达的点加入集合set
+     *
      * @param connectedPoints 核心点集
-     * @param leftCorePoints 该核心点的边界点集
+     * @param leftCorePoints  该核心点的边界点集
      * @return 确定的一个簇点集
      */
     private Set<Point2D> joinConnectedCorePoints(Set<Point2D> connectedPoints, Set<Point2D> leftCorePoints) {
@@ -224,27 +225,60 @@ public class DensityFiltering extends Clustering2D {
 
 
     /**
-     * 确定p1周围需要连接的核心点后，话要把和这些周围一圈直接密度可达的点加入集合set
-     * @param p1 核心点
+     * 确定p1周围需要连接的核心点后，还要把和这些周围一圈直接密度可达的点加入集合set
+     *
+     * @param p1             核心点
      * @param leftCorePoints 该核心点的边界点集
      * @return 确定的一个簇点集
      */
     private Set<Point2D> joinConnectedCorePoints(Point2D p1, Set<Point2D> leftCorePoints) {
         Set<Point2D> set = Sets.newHashSet();
-        for (Point2D p2 : leftCorePoints) {
-            double distance = epsEstimator.getDistanceCache().computeDistance(p1, p2);
 
-            //根据两点夹角确定实际eps距离
-            double ellipseDist = epsEstimator.getDistanceCache().computeEllipseDist(p1, p2);
+        int count = 6;
+        HashMap<Integer, Set<Point2D>> circleMap = new HashMap<>(6);
 
-            if (distance <= ellipseDist) {
-                // join 2 core points to the same cluster
-                set.add(p2);
+        for (int i = 0; i < count; i++) {
+            Set<Point2D> temp = Sets.newHashSet();
+            for (Point2D p2 : leftCorePoints) {
+                //if (p2.getX() > p1.getX()) {
+                    double distance = epsEstimator.getDistanceCache().computeDistance(p1, p2);
+                    //根据两点夹角确定实际eps距离
+                    double ellipseDist = computeEllipseDistByAngle(p1, p2, i * (180.0 / count));
+                    if (distance <= ellipseDist) {
+                        // join 2 core points to the same cluster
+                        temp.add(p2);
+                    }
+                //}
+            }
+
+            circleMap.put(i, temp);
+        }
+
+        //取value最大峰值
+        int index = 0, num = 0;
+        for (Map.Entry<Integer, Set<Point2D>> entry : circleMap.entrySet()) {
+            if (entry.getValue().size() > num) {
+                num = entry.getValue().size();
+                index = entry.getKey();
             }
         }
+
+
         // remove connected points
-        leftCorePoints.removeAll(set);
-        return set;
+        leftCorePoints.removeAll(circleMap.get(index));
+        return circleMap.get(index);
+    }
+
+    private double computeEllipseDistByAngle(final Point2D p1, final Point2D p2, final double angle) {
+        Double ellipseDist2 = 0.0;
+
+        double theta = Math.atan((p2.getY() - p1.getY()) / (p2.getX() - p1.getX())) - Math.toRadians(angle);
+        ellipseDist2 = (epsA * epsA * epsB * epsB) / (epsB * epsB +
+                epsA * epsA * Math.tan(theta) * Math.tan(theta)) +
+                (epsA * epsA * epsB * epsB * Math.tan(theta) * Math.tan(theta)) / (epsB * epsB
+                        + epsA * epsA * Math.tan(theta) * Math.tan(theta));
+
+        return Math.sqrt(ellipseDist2);
     }
 
     public void setMinPts(int minPts) {
