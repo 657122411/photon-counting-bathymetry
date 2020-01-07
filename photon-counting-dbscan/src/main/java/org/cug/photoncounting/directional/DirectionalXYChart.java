@@ -113,7 +113,7 @@ public class DirectionalXYChart extends JFrame implements ClusteringXYChart {
 
     public static void main(String args[]) {
 
-        String chartTitle = "Directional []";
+        String chartTitle = "Directional";
         String dir = FileUtils.getDbscanDataRootDir().getAbsolutePath();
         File clusterPointFile = getClusterPointFile(args, dir);
 
