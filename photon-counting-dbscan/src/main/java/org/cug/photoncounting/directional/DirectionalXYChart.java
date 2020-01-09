@@ -37,9 +37,11 @@ public class DirectionalXYChart extends JFrame implements ClusteringXYChart {
     private File clusterPointFile;
     private Map<Integer, Set<ClusterPoint2D>> clusterPoints = Maps.newHashMap();
     private final List<Color> colorSpace = Lists.newArrayList();
-    private final Set<ClusterPoint2D> outliers = Sets.newHashSet();
+    private final Set<ClusterPoint2D> outliers1 = Sets.newHashSet();
+    private final Set<ClusterPoint2D> outliers2 = Sets.newHashSet();
     private int outlierClusterId;
-    private XYSeries outlierXYSeries;
+    private XYSeries outlierXYSeries1;
+    private XYSeries outlierXYSeries2;
 
     public DirectionalXYChart(String chartTitle) throws HeadlessException {
         super();
@@ -47,7 +49,7 @@ public class DirectionalXYChart extends JFrame implements ClusteringXYChart {
     }
 
     private XYSeriesCollection buildXYDataset() {
-        FileUtils.read2DClusterPointsFromFile(clusterPoints, outliers, "[\t,;\\s]+", clusterPointFile);
+        FileUtils.read2DClusterPointsFromFile(clusterPoints, outliers1, outliers2, "[\t,;\\s]+", clusterPointFile);
         return ChartUtils.createXYSeriesCollection(clusterPoints);
     }
 
@@ -55,8 +57,10 @@ public class DirectionalXYChart extends JFrame implements ClusteringXYChart {
     public void drawXYChart() {
         // create xy dataset from points file
         final XYSeriesCollection xyDataset = buildXYDataset();
-        outlierXYSeries = new XYSeries(outlierClusterId);
-        xyDataset.addSeries(outlierXYSeries);
+        outlierXYSeries1 = new XYSeries(-1);
+        xyDataset.addSeries(outlierXYSeries1);
+        outlierXYSeries2 = new XYSeries(-2);
+        xyDataset.addSeries(outlierXYSeries2);
 
         // create chart & configure xy plot
         JFreeChart jfreechart = ChartFactory.createScatterPlot(null, "X", "Y", xyDataset, PlotOrientation.VERTICAL, true, true, false);
@@ -91,7 +95,8 @@ public class DirectionalXYChart extends JFrame implements ClusteringXYChart {
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, false));
 
         // display/hide outliers
-        ChartUtils.createToggledButtons(panel, outlierXYSeries, outliers, "Display Outliers", "Hide Outliers");
+        ChartUtils.createToggledButtons(panel, outlierXYSeries1, outliers1, "显示粗去噪", "隐藏粗去噪");
+        ChartUtils.createToggledButtons(panel, outlierXYSeries2, outliers2, "显示精去噪", "隐藏精去噪");
         this.add(panel, BorderLayout.SOUTH);
     }
 

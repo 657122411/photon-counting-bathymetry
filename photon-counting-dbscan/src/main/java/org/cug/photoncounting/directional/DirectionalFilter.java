@@ -191,7 +191,7 @@ public class DirectionalFilter {
                 }
                 //去噪
                 if ((maxW - centerPoint.getwP()) > threshold) {
-                    centerPoint.setFlag(-1);
+                    centerPoint.setFlag(-2);
                     count++;
                 }
             }

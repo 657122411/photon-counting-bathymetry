@@ -143,6 +143,49 @@ public class FileUtils {
         }
     }
 
+    /**
+     * 同上，噪点集分12
+     */
+    public static void read2DClusterPointsFromFile(final Map<Integer, Set<ClusterPoint2D>> points,
+                                                   final Set<ClusterPoint2D> noisePoints1,
+                                                   final Set<ClusterPoint2D> noisePoints2, String delimiterRegex, File pointFile) {
+        BufferedReader reader = null;
+        try {
+            // collect clustered points
+            reader = new BufferedReader(new FileReader(pointFile.getAbsoluteFile()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    String[] a = line.split("[,;\t\\s]+");
+                    if (a.length == 3) {
+                        int clusterId = Integer.parseInt(a[2]);
+                        ClusterPoint2D clusterPoint =
+                                new ClusterPoint2D(Double.parseDouble(a[0]), Double.parseDouble(a[1]), clusterId);
+                        // collect noise points
+                        if (clusterId == -1) {
+                            noisePoints1.add(clusterPoint);
+                            continue;
+                        }
+                        if (clusterId == -2) {
+                            noisePoints2.add(clusterPoint);
+                            continue;
+                        }
+                        Set<ClusterPoint2D> set = points.get(clusterId);
+                        if (set == null) {
+                            set = Sets.newHashSet();
+                            points.put(clusterId, set);
+                        }
+                        set.add(clusterPoint);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw Throwables.propagate(e);
+        } finally {
+            FileUtils.closeQuietly(reader);
+        }
+    }
+
     public static void read2DPointsFromFile(final Map<Integer, Set<ClusterPoint2D>> points, String delimiterRegex, File pointFile) {
         BufferedReader reader = null;
         try {
