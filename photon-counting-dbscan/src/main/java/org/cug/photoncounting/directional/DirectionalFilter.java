@@ -11,9 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.exp;
@@ -248,12 +246,32 @@ public class DirectionalFilter {
         LOG.info("---end outputData---");
     }
 
+    /**
+     * 原始数据高程分布
+     */
+    private void analyse() {
+        LOG.info("---start analyse---");
+        Map<Integer, Integer> map = new TreeMap<>();
+
+        for (Point2DTheta p : outList) {
+            int index = (int) Math.floor(p.getY());
+            map.merge(index, 1, Integer::sum);
+        }
+
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            System.out.println(entry.getKey() + " " + entry.getValue());
+        }
+
+        LOG.info("---end analyse---");
+    }
+
     public static void main(String[] args) {
         DirectionalFilter d = new DirectionalFilter(5, 0.5, 3);
         d.getAllPoints(new File(FileUtils.getDbscanDataRootDir(), "DirectionalInput.txt"));
         d.calcuDensity();
         d.roughFilter(60);
         d.meticulousFilter(5, 3, 1000);
+        d.analyse();
         d.outputData();
     }
 }
