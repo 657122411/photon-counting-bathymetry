@@ -262,6 +262,19 @@ public class DirectionalFilter {
             System.out.println(entry.getKey() + " " + entry.getValue());
         }
 
+        int surface = 0, bottom = 0, noise = 0;
+        for (Point2DTheta p : outList) {
+            if (p.getFlag() == 0 && p.getY() >= 29.5) {
+                surface++;
+            } else if (p.getFlag() == 0 && p.getY() < 29.5) {
+                bottom++;
+            } else {
+                noise++;
+            }
+
+        }
+        System.out.println("surface:" + surface + " bottom:" + bottom + " noise:" + noise);
+
         LOG.info("---end analyse---");
     }
 

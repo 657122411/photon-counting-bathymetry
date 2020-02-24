@@ -405,6 +405,23 @@ public class DensityFiltering extends Clustering2D {
         for (Point2D p : c.getOutliers()) {
             System.out.println(p.getX() + "," + p.getY() + "," + outliersClusterId);
         }
+
+        //数据分析
+        int surface = 0, bottom = 0, noise = 0;
+        noise = c.getOutliers().size();
+        Iterator<Entry<Integer, Set<ClusterPoint<Point2D>>>> iter = result.getClusteredPoints().entrySet().iterator();
+        while (iter.hasNext()) {
+            Entry<Integer, Set<ClusterPoint<Point2D>>> entry = iter.next();
+            int clusterId = entry.getKey();
+            for (ClusterPoint<Point2D> cp : entry.getValue()) {
+                if (cp.getPoint().getY() <= 1.0) {
+                    bottom++;
+                } else if (cp.getPoint().getY() > 1.0) {
+                    surface++;
+                }
+            }
+        }
+        LOG.info("surface:" + surface + "bottom:" + bottom + "noise:" + noise);
     }
 
 }
